@@ -1679,3 +1679,33 @@ tmpdir.refresh();
   }));
 
 }
+
+{
+  // Close is not guaranteed to be emitted before callback is called in the pipeline
+  let isDestroyFinish = false;
+  const src = new Readable();
+  const dst = new Writable({
+    destroy(error, cb) {
+      // Takes a while to destroy
+      setImmediate(() => {
+        isDestroyFinish = true;
+        cb();
+      });
+    },
+  });
+
+  pipeline(src, dst, (err) => {
+    assert.strictEqual(dst.closed, false);
+    assert.strictEqual(isDestroyFinish, false);
+  });
+
+  src.destroy(new Error('problem'));
+
+  process.nextTick(() => {
+    setImmediate(() => {
+      assert.strictEqual(dst.closed, true);
+      assert.strictEqual(isDestroyFinish, true);
+    });
+  });
+
+}

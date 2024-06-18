@@ -2853,7 +2853,8 @@ failure, this can cause event listener leaks and swallowed errors. If the last
 stream is readable, dangling event listeners will be removed so that the last
 stream can be consumed later.
 
-`stream.pipeline()` closes all the streams when an error is raised.
+`stream.pipeline()` closes all the streams when an error is raised, please note
+that the `close` is not guaranteed to be emitted when callback is called.
 The `IncomingRequest` usage with `pipeline` could lead to an unexpected behavior
 once it would destroy the socket without sending the expected response.
 See the example below:
