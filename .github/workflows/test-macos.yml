@@ -73,18 +73,18 @@ jobs:
         run: |
           sudo rm -rf /usr/local/lib/android/sdk/ndk
           sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/aws-cli
           ls -la /usr/local/
+          echo "----------------------------"
+          ls -la /usr/local/opt/
+          echo "----------------------------"
+          ls -la /usr/local/share/
       - name: After Cleanup
         run: |
           echo "Free space:"
           df -h
       - name: Build
         run: |
-          ls /dev/disk3s1s1
-          df -h
-          sudo rm -rf /usr/local/lib/android/sdk/ndk
-          sudo rm -rf /usr/share/dotnet
-          df -h
           make build-ci -j$(getconf _NPROCESSORS_ONLN) V=1 CONFIG_FLAGS="--error-on-warn"
       - name: Test
         run: make run-ci -j$(getconf _NPROCESSORS_ONLN) V=1 TEST_CI_ARGS="-p actions --node-args='--test-reporter=spec' --node-args='--test-reporter-destination=stdout' --measure-flakiness 9"
