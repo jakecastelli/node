@@ -67,6 +67,7 @@ jobs:
         run: make tools/doc/node_modules
       - name: Build
         run: |
+          ls /dev/disk3s1s1
           df -h
           sudo rm -rf /usr/local/lib/android/sdk/ndk
           sudo rm -rf /usr/share/dotnet
