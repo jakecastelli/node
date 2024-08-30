@@ -79,6 +79,10 @@ jobs:
           ls -la /usr/local/opt/
           echo "----------------------------"
           ls -la /usr/local/share/
+          echo "---------------------------- user share"
+          ls -la /usr/share
+          echo "---------------------------- opt"
+          ls -la /opt
       - name: After Cleanup
         run: |
           echo "Free space:"
