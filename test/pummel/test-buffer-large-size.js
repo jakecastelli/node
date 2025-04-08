@@ -1,3 +1,4 @@
+// Flags: --expose-gc
 'use strict';
 const common = require('../common');
 
@@ -22,19 +23,22 @@ const stringTooLongError = {
 const size = 2 ** 31;
 
 // Test Buffer.toString
-const bufferMethodsToTest = [SlowBuffer, Buffer.alloc, Buffer.allocUnsafe, Buffer.allocUnsafeSlow];
-
-bufferMethodsToTest.forEach((method) => {
-  test(`${method.name} with too long size`, () => {
-    try {
-      assert.throws(() => method(size).toString('utf8'), stringTooLongError);
-    } catch (e) {
-      if (e.code !== 'ERR_MEMORY_ALLOCATION_FAILED') {
-        throw e;
-      }
-      common.skip('insufficient space for Buffer.alloc');
+test('Buffer.toString with too long size', () => {
+  try {
+    assert.throws(() => SlowBuffer(size).toString('utf8'), stringTooLongError);
+    globalThis.gc({type: 'major'});
+    assert.throws(() => Buffer.alloc(size).toString('utf8'), stringTooLongError);
+    globalThis.gc({type: 'major'});
+    assert.throws(() => Buffer.allocUnsafe(size).toString('utf8'), stringTooLongError);
+    globalThis.gc({type: 'major'});
+    assert.throws(() => Buffer.allocUnsafeSlow(size).toString('utf8'), stringTooLongError);
+    globalThis.gc({type: 'major'});
+  } catch (e) {
+    if (e.code !== 'ERR_MEMORY_ALLOCATION_FAILED') {
+      throw e;
     }
-  });
+    common.skip('insufficient space for Buffer.alloc');
+  }
 });
 
 // Test Buffer.write
@@ -43,6 +47,8 @@ test('Buffer.write with too long size', () => {
     const buf = Buffer.alloc(size);
     assert.strictEqual(buf.write('a', 2, kStringMaxLength), 1);
     assert.strictEqual(buf.write('a', 2, size), 1);
+    buf = null;
+    globalThis.gc({type: 'major'});
   } catch (e) {
     if (e.code !== 'ERR_MEMORY_ALLOCATION_FAILED') {
       throw e;
