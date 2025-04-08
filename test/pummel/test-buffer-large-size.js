@@ -22,18 +22,19 @@ const stringTooLongError = {
 const size = 2 ** 31;
 
 // Test Buffer.toString
-test('Buffer.toString with too long size', () => {
-  try {
-    assert.throws(() => SlowBuffer(size).toString('utf8'), stringTooLongError);
-    assert.throws(() => Buffer.alloc(size).toString('utf8'), stringTooLongError);
-    assert.throws(() => Buffer.allocUnsafe(size).toString('utf8'), stringTooLongError);
-    assert.throws(() => Buffer.allocUnsafeSlow(size).toString('utf8'), stringTooLongError);
-  } catch (e) {
-    if (e.code !== 'ERR_MEMORY_ALLOCATION_FAILED') {
-      throw e;
+const bufferMethodsToTest = [SlowBuffer, Buffer.alloc, Buffer.allocUnsafe, Buffer.allocUnsafeSlow];
+
+bufferMethodsToTest.forEach((method) => {
+  test(`${method.name} with too long size`, () => {
+    try {
+      assert.throws(() => method(size).toString('utf8'), stringTooLongError);
+    } catch (e) {
+      if (e.code !== 'ERR_MEMORY_ALLOCATION_FAILED') {
+        throw e;
+      }
+      common.skip('insufficient space for Buffer.alloc');
     }
-    common.skip('insufficient space for Buffer.alloc');
-  }
+  });
 });
 
 // Test Buffer.write
